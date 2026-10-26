@@ -209,6 +209,7 @@ if (visibleProjects.length) {
     document.body.appendChild(lightbox);
 
     const lightboxImage = lightbox.querySelector('.image-lightbox__image');
+    const imageWrap = lightbox.querySelector('.image-lightbox__image-wrap');
     const lightboxWebp = lightbox.querySelector('.image-lightbox__webp');
     const lightboxTitle = lightbox.querySelector('.image-lightbox__title');
     const closeButton = lightbox.querySelector('.image-lightbox__close');
@@ -303,10 +304,17 @@ if (visibleProjects.length) {
         if (action === 'reset') setZoom(1);
     });
     lightboxImage.addEventListener('click', () => setZoom(zoomLevel === 1 ? 2 : 1));
-    lightbox.addEventListener('wheel', event => {
-        if (lightbox.hidden || !event.ctrlKey) return;
+    imageWrap.addEventListener('wheel', event => {
+        if (lightbox.hidden) return;
+        if (event.ctrlKey) {
+            event.preventDefault();
+            setZoom(zoomLevel + (event.deltaY < 0 ? 0.25 : -0.25));
+            return;
+        }
+        if (zoomLevel <= 1) return;
         event.preventDefault();
-        setZoom(zoomLevel + (event.deltaY < 0 ? 0.25 : -0.25));
+        panY -= event.deltaY;
+        lightboxImage.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
     }, { passive: false });
     let dragStart = null;
     let didPan = false;
